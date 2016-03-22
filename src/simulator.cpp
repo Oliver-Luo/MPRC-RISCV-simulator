@@ -7,8 +7,6 @@
  *
  * Copyright (C) 2014-2015 Microprocessor R&D Center (MPRC), Peking University
  */
-
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <map>
@@ -21,7 +19,6 @@
 using namespace std;
 
 #define ERROR -1
-
 #define	BUFFSIZE 1024
 #define	REGSIZE	32
 
@@ -34,14 +31,7 @@ static bool single_step;
 
 uint8_t retrieve_or_error(uint32_t addr);
 
-static Elf32_Addr read_elf(FILE *file);
-static Elf32_Ehdr read_elf_header(FILE *file);
-static Elf32_Phdr* read_prog_headers(FILE *file, Elf32_Ehdr elf_header);
-static Elf32_Shdr* read_sec_headers(FILE *file, Elf32_Ehdr elf_header);
-static void load_data(FILE *file, Elf32_Shdr *sec_hdrs, int data_index);
-static void load_prog(FILE *file, Elf32_Phdr *prog_hdrs, int pnum);
 static void exec_prog(Elf32_Addr main_entry);
-static int init_reg(FILE *file, Elf32_Ehdr elf_header, Elf32_Shdr *sec_hdrs, int snum);
 static unsigned int decode(unsigned int single_inst);
 static uint32_t fetch(uint32_t pc);
 static void debug(uint32_t pc, uint32_t cmd);
@@ -77,155 +67,7 @@ int main(int argc, char const *argv[])
 	return 0;
 }
 
-static Elf32_Addr read_elf(FILE *file)
-{
-	Elf32_Ehdr elf_header;
-	Elf32_Phdr *prog_hdrs;
-	Elf32_Shdr *sec_hdrs;
-	int data_index = -1;
 
-	elf_header = read_elf_header(file);
-	prog_hdrs = read_prog_headers(file, elf_header);
-	sec_hdrs = read_sec_headers(file, elf_header);
-	data_index = init_reg(file, elf_header, sec_hdrs, elf_header.e_shnum);
-	if(data_index != -1)
-		load_data(file, sec_hdrs, data_index);
-
-	load_prog(file, prog_hdrs, elf_header.e_phnum);
-
-	return elf_header.e_entry;
-}
-
-static Elf32_Ehdr read_elf_header(FILE *file)
-{
-	int i = 0;
-	Elf32_Ehdr elf_header;
-
-	(void)fread(&elf_header, sizeof(elf_header), 1, file);
-	if (ferror(file))
-	{
-		printf("Error while reading ELF header.\n");
-		exit(EXIT_FAILURE);
-	}
-
-#ifdef DEBUG_HEADER
-	printf("\n\nContent of ELF header:\n\ne_ident:\n\t");
-	for (i = 0; i < EI_NIDENT; i++)
-		printf("0x%x  ",elf_header.e_ident[i]);
-	printf("\n");
-	printf("e_type:\t\t%d\n", elf_header.e_type);
-	if (elf_header.e_machine == 243)
-		printf("e_machine:\tRISC-V\n");
-	else
-		printf("e_machine:\t%d\n", elf_header.e_machine);
-	printf("e_version:\t%d\n", elf_header.e_version);
-	printf("e_entry:\t0x%x\n", elf_header.e_entry);
-	printf("e_phoff:\t%d\n", elf_header.e_phoff);
-	printf("e_shoff:\t%d\n", elf_header.e_shoff);
-	printf("e_flags:\t0x%x\n", elf_header.e_flags);
-	printf("e_ehsize:\t%d\n", elf_header.e_ehsize);
-	printf("e_phentsize:\t%d\n", elf_header.e_phentsize);
-	printf("e_phnum:\t%d\n", elf_header.e_phnum);
-	printf("e_shentsize:\t%d\n", elf_header.e_shentsize);
-	printf("e_shnum:\t%d\n", elf_header.e_shnum);
-	printf("e_shstrndx:\t%d\n", elf_header.e_shstrndx);
-#endif
-
-	return elf_header;
-}
-
-static Elf32_Phdr* read_prog_headers(FILE *file, Elf32_Ehdr elf_header)
-{
-	Elf32_Phdr *prog_headers = new Elf32_Phdr[elf_header.e_phnum];
-
-	fseek(file,elf_header.e_phoff ,SEEK_SET);
-	fread(prog_headers, sizeof(Elf32_Phdr), elf_header.e_phnum, file);
-
-#ifdef DEBUG_HEADER
-
-	for (int i = 0; i < elf_header.e_phnum; ++i)
-	{
-		printf("\n\nContent of Program header %d\n\n", i);
-		printf("p_type:\t\t%x\n", prog_headers[i].p_type);
-		printf("p_offset:\t%d\n", prog_headers[i].p_offset);
-		printf("p_vaddr:\t0x%x\n", prog_headers[i].p_vaddr);
-		printf("p_filesz:\t%d\n", prog_headers[i].p_filesz);
-		printf("p_memsz:\t%d\n", prog_headers[i].p_memsz);
-		printf("p_flags:\t%x\n", prog_headers[i].p_flags);
-		printf("p_align:\t%d\n", prog_headers[i].p_align);
-	}
-
-#endif
-
-	return prog_headers;
-}
-
-static Elf32_Shdr* read_sec_headers(FILE *file, Elf32_Ehdr elf_header)
-{
-	Elf32_Shdr *sec_headers = new Elf32_Shdr[elf_header.e_shnum];
-	fseek(file, elf_header.e_shoff, SEEK_SET);
-	fread(sec_headers, sizeof(Elf32_Shdr), elf_header.e_shnum, file);
-
-#ifdef DEBUG_HEADER
-	for (int i = 0; i < elf_header.e_shnum ; ++i)
-	{
-		printf("\n\nContent of section header %d\n\n", i);
-		printf("sh_name:\t%x\n", sec_headers[i].sh_name);
-		printf("sh_type:\t%x\n", sec_headers[i].sh_type);
-		printf("sh_flags:\t%x\n", sec_headers[i].sh_flags);
-		printf("sh_addr:\t%x\n", sec_headers[i].sh_addr);
-		printf("sh_offset:\t%x\n", sec_headers[i].sh_offset);
-		printf("sh_size:\t%x\n", sec_headers[i].sh_size);
-		printf("sh_link:\t%x\n", sec_headers[i].sh_link);
-		printf("sh_info:\t%x\n", sec_headers[i].sh_info);
-		printf("sh_addralign:\t%x\n", sec_headers[i].sh_addralign);
-		printf("sh_entsize:\t%x\n", sec_headers[i].sh_entsize);
-	}
-#endif
-
-	return sec_headers;
-}
-
-static void load_prog(FILE *file, Elf32_Phdr *prog_hdrs, int pnum)
-{
-	Elf32_Addr cur_addr;
-	uint8_t cur_inst;
-
-	for (int i = 0; i < pnum; ++i)
-	{
-		fseek(file, prog_hdrs[i].p_offset, SEEK_SET);
-		cur_addr = prog_hdrs[i].p_vaddr;
-		for (int j = 0; j < prog_hdrs[i].p_filesz; j++)
-		{
-			fread(&cur_inst, sizeof(char), 1, file);
-			mem.insert(pair<uint32_t, uint8_t>(cur_addr, cur_inst));
-			cur_addr ++;
-			/* code */
-		}
-	}
-
-#ifdef DEBUG_MEMORY
-	print_mem();
-#endif
-}
-
-static void load_data(FILE *file, Elf32_Shdr *sec_hdrs, int data_index)
-{
-	uint32_t offset_from_file = sec_hdrs[data_index].sh_offset;
-	uint32_t size = sec_hdrs[data_index].sh_size;
-	Elf32_Addr start_vaddr = sec_hdrs[data_index].sh_addr;
-	uint8_t	 cur_data;
-
-	Elf32_Addr cur_addr = start_vaddr;
-	fseek(file, offset_from_file, SEEK_SET);
-
-	for (int i = 0; i < size; ++i)
-	{
-		fread(&cur_data, sizeof(char), 1, file);
-		mem.insert(pair<uint32_t, uint8_t>(cur_addr, cur_data));
-		cur_addr++;
-	}
-}	
 
 static void exec_prog(Elf32_Addr main_entry)
 {
@@ -340,87 +182,6 @@ static void exec_prog(Elf32_Addr main_entry)
 
 	
 }
-
-static int init_reg(FILE *file, Elf32_Ehdr elf_header, Elf32_Shdr *sec_hdrs, int snum)
-{
-	int index;
-	for (index = 0; index < REGSIZE; index++)
-		reg[index] = 0;
-	PC = elf_header.e_entry;
-
-	/*the following code is init gp and sp */
-	//FIXME sp	
-	reg[2] = 20000;
-
-	/* init shstrtab */
-	char *sh_str_content = NULL;
-	sh_str_content = new char[sec_hdrs[elf_header.e_shstrndx].sh_size];
-	fseek(file, sec_hdrs[elf_header.e_shstrndx].sh_offset, SEEK_SET);
-	fread(sh_str_content, sizeof(char), sec_hdrs[elf_header.e_shstrndx].sh_size, file);
-
-	int index_strtab = -1;
-	int index_symtab = -1;
-	int sym_num = -1;
-	char *str_content = NULL;
-	for (int i = 0; i < snum; ++i)
-	{
-		if(strcmp(".strtab",& sh_str_content[sec_hdrs[i].sh_name])==0)
-			index_strtab = i;
-		else if(sec_hdrs[i].sh_type == SHT_SYMTAB)
-			index_symtab = i;
-		else
-			continue;
-	}
-
-	//FIXME
-	if( index_symtab == -1 | index_strtab == -1)
-	{
-		printf("Cannot find systab or strtab!\n");
-		exit(EXIT_FAILURE);
-	}
-
-	/*init string table */
-	str_content = new char[sec_hdrs[index_strtab].sh_size];
-	fseek(file, sec_hdrs[index_strtab].sh_offset, SEEK_SET);
-	fread(str_content, sizeof(char), sec_hdrs[index_strtab].sh_size, file);
-
-	/* init symbol table*/
-	sym_num = sec_hdrs[index_symtab].sh_size/sec_hdrs[index_symtab].sh_entsize;
-	Elf32_Sym *symbol_table = new Elf32_Sym[sym_num];
-	fseek(file, sec_hdrs[index_symtab].sh_offset, SEEK_SET);
-	fread(symbol_table, sizeof(Elf32_Sym), sym_num, file);
-
-	/* init gp register */
-
-	for (int i = 0; i < sym_num; ++i)
-	{
-#ifdef DEBUG_HEADER
-		printf("\n\nContent of symbol table entry %d\n\n", i);	
-		printf("st_name:\t%s\n", &str_content[symbol_table[i].st_name]);
-		printf("st_value:\t%x\n", symbol_table[i].st_value);
-		printf("st_size:\t%x\n", symbol_table[i].st_size);
-		printf("st_info:\t%x\n", symbol_table[i].st_info);
-		printf("st_other:\t%x\n", symbol_table[i].st_other);
-		printf("st_shndx:\t%x\n", symbol_table[i].st_shndx);	
-#endif
-
-		if (strcmp("_gp", &str_content[symbol_table[i].st_name]) == 0)
-			reg[3] = symbol_table[i].st_value;
-	}
-
-	/*find data section*/
-	int data_index = -1;
-	for (int i = 0; i < snum; ++i)
-	{
-		if (strcmp(".data", &sh_str_content[sec_hdrs[i].sh_name]) == 0)
-		{
-			data_index = i;
-			break;
-		}
-	}
-	return data_index;
-}
-
 
 static uint32_t fetch(uint32_t pc)
 {

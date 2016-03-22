@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdio.h>
 
 #define EI_NIDENT 16
 #define Elf32_Addr uint32_t
@@ -30,6 +31,8 @@
 #define SHT_HIPROC      0x7fffffff      /* End of processor-specific */
 #define SHT_LOUSER      0x80000000      /* Start of application-specific */
 #define SHT_HIUSER      0x8fffffff      /* End of application-specific */
+
+#define SHN_UNDEF       0
 
 typedef struct {
     unsigned char  e_ident[EI_NIDENT];
@@ -83,3 +86,5 @@ typedef struct
     unsigned char st_other;
     Elf32_Half st_shndx;
 }Elf32_Sym;
+
+Elf32_Addr read_elf(FILE *file);
