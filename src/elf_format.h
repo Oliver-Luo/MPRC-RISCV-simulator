@@ -34,6 +34,10 @@
 
 #define SHN_UNDEF       0
 
+
+#define STT_FUNC        2
+#define ELF32_ST_TYPE(i) ((i)&0xF)
+
 typedef struct {
     unsigned char  e_ident[EI_NIDENT];
     Elf32_Half     e_type;

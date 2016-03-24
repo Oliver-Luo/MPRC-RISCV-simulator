@@ -31,6 +31,8 @@ static void load_data(FILE *file, int data_index);
 static void load_prog(FILE *file, int pnum);
 static void print_mem(void);
 static int init_reg(FILE *file);
+static void print_as_char(Elf32_Addr start_addr, uint32_t size);
+static void print_as_hex(Elf32_Addr start_addr, uint32_t size);
 
 Elf32_Addr get_func_addr(char *func_name)
 {
@@ -49,19 +51,38 @@ Elf32_Addr get_func_addr(char *func_name)
 
 const char *get_func_name(Elf32_Addr func_addr)
 {
-	printf("func_addr:%x\n", func_addr);
+
 	if (symbol_table == NULL || str_tbl == NULL || sec_hdrs == NULL)
-	{	printf("elf header info not inited!!\n");return NULL;}
+	{	printf("elf header info not inited!!\n");	return NULL;   }
 	
 	int sym_num;
 	sym_num = sec_hdrs[index_symtab].sh_size/sec_hdrs[index_symtab].sh_entsize;
 
 	for (int i = 0; i < sym_num; ++i)
-		if (func_addr ==  symbol_table[i].st_value)
-			printf("%s\n", &sh_str_tbl[symbol_table[i].st_name]);
-	
-	printf("Cannot found!\n");
+		if (ELF32_ST_TYPE(symbol_table[i].st_info) == STT_FUNC && func_addr ==  symbol_table[i].st_value)
+			return &str_tbl[symbol_table[i].st_name];
+
 	return NULL;
+}
+
+void print_mem_data()
+{
+
+	for (int i = 0; i < elf_header.e_shnum; ++i)
+	{
+		if (strstr(&sh_str_tbl[sec_hdrs[i].sh_name], "data") != NULL ||
+			strcmp(&sh_str_tbl[sec_hdrs[i].sh_name], ".bss") == 0)
+		{
+			printf("the content of %s, print as char: \n", 
+				    &sh_str_tbl[sec_hdrs[i].sh_name]);
+			print_as_char(sec_hdrs[i].sh_addr, sec_hdrs[i].size);
+
+			printf("the content of %s, print as hex: \n", 
+					&sh_str_tbl[sec_hdrs[i].sh_name]);
+			print_as_hex(sec_hdrs[i].sh_addr, sec_hdrs[i].sh_size);
+		}
+	}
+
 }
 
 Elf32_Addr read_elf(FILE *file)
@@ -321,4 +342,14 @@ static void print_mem(void)
 		printf("addr:%x\tinst:%x\n", iter->first, iter->second);
 
 	return;
+}
+
+static void print_as_char(Elf32_Addr start_addr, uint32_t size)
+{
+	//fill me
+}
+
+static void print_as_hex(Elf32_Addr start_addr, uint32_t size)
+{
+	//fill me
 }
