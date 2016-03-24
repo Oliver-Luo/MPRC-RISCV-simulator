@@ -338,7 +338,27 @@ static void debug(uint32_t pc, uint32_t cmd)
 			if (strtok == NULL)
 				continue;
 			addr = strtoll(token, NULL, 16);
-			breakpoints.insert(addr);
+				
+			map<uint32_t, uint8_t>::iterator iter;
+			iter = mem.find(addr);
+			if ((addr != 0) && (iter != mem.end()))
+			{
+				printf("%s: %x\n", token, addr);
+				breakpoints.insert(addr);
+				return;
+
+			}
+			else if (get_func_addr(token))
+			{
+				printf("%s: %x\n", token, get_func_addr(token));
+				breakpoints.insert(get_func_addr(token));
+				return;
+			}
+			else
+			{
+				printf("Wrong use of breakpoint, please see help.\n");
+				continue;
+			}
 			return;	
 		}
 		else if (strcmp(token, "h") == 0)
