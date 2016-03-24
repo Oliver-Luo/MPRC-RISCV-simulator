@@ -89,3 +89,5 @@ typedef struct
 
 Elf32_Addr read_elf(FILE *file);
 Elf32_Addr get_func_addr(char *func_name);
+const char *get_func_name(Elf32_Addr func_addr);
+void print_mem_data();

@@ -47,6 +47,23 @@ Elf32_Addr get_func_addr(char *func_name)
 	return 0;
 }
 
+const char *get_func_name(Elf32_Addr func_addr)
+{
+	printf("func_addr:%x\n", func_addr);
+	if (symbol_table == NULL || str_tbl == NULL || sec_hdrs == NULL)
+	{	printf("elf header info not inited!!\n");return NULL;}
+	
+	int sym_num;
+	sym_num = sec_hdrs[index_symtab].sh_size/sec_hdrs[index_symtab].sh_entsize;
+
+	for (int i = 0; i < sym_num; ++i)
+		if (func_addr ==  symbol_table[i].st_value)
+			printf("%s\n", &sh_str_tbl[symbol_table[i].st_name]);
+	
+	printf("Cannot found!\n");
+	return NULL;
+}
+
 Elf32_Addr read_elf(FILE *file)
 {
 	int data_index = -1;
