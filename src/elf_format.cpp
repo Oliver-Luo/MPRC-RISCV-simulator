@@ -348,10 +348,62 @@ static void print_mem(void)
 
 static void print_as_char(Elf32_Addr start_addr, uint32_t size)
 {
-	//fill me
+	Elf32_Addr cur_addr = start_addr;
+	Elf32_Addr end_addr = start_addr + size;
+	Elf32_Addr lim_addr;
+	map<uint32_t,uint8_t>::iterator iter;
+
+	while(true)
+	{	
+		lim_addr = (cur_addr+20 < end_addr)?(cur_addr+20):end_addr;
+		
+		printf("content from 0x%x to 0x%x\n", cur_addr, lim_addr-1);
+		for (int i = cur_addr; i < lim_addr; ++i)
+		{
+			iter = mem.find(i);
+			if (iter != mem.end())
+				printf("%c", iter->second);
+			else
+				printf("in func print_as_char, Cannot find addr %x\n", i);
+		}
+		printf("\n");
+
+		if(lim_addr < end_addr)
+			cur_addr = lim_addr;
+		else
+			break;
+	}
+
 }
 
 static void print_as_hex(Elf32_Addr start_addr, uint32_t size)
 {
-	//fill me
+	uint32_t tmp_out;
+	Elf32_Addr cur_addr = start_addr;
+	Elf32_Addr end_addr = start_addr + size;
+	Elf32_Addr lim_addr;
+	map<uint32_t,uint8_t>::iterator iter;
+
+	while(true)
+	{
+		tmp_out = 0;
+		int shift = 0;
+		lim_addr = (cur_addr+4 < end_addr)?(cur_addr+4):end_addr;
+
+		for (int i = cur_addr; i < lim_addr; ++i)
+		{
+			iter = mem.find(i);
+			if (iter != mem.end())
+				tmp_out = tmp_out | ((iter->second)<<shift);
+			else
+				printf("in func print_as_hex, Cannot find addr %x\n", i);
+			shift += 8;
+		}
+
+		printf("content of addr %x: %x\n", cur_addr, tmp_out);
+		if (lim_addr < end_addr)
+			cur_addr = lim_addr;
+		else
+			break;
+	}
 }
