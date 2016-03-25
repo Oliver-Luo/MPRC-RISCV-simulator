@@ -1,1 +1,7 @@
 simulator
+
+test/*.exe
+test/*.asm
+test/*.o
+test/*.elf
+test/*.s
