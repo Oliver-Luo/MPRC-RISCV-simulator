@@ -27,6 +27,40 @@ uint8_t retrieve_or_error(uint32_t addr);
 #define Rs1(inst) ((inst >> 15) & 0x1f)
 #define Rs2(inst) ((inst >> 20) & 0x1f)
 
+static char *get_str(Elf32_Addr start)
+{
+	map<uint32_t, uint8_t>::iterator iter;
+	Elf32_Addr cur = start;
+	char *str;
+	int count = 0;
+
+	while(true)
+	{
+		iter = mem.find(cur);
+		if(iter == mem.end())
+		{
+			printf("in func get_str, cannot find addr: %x\n", cur);
+			exit(EXIT_FAILURE);
+		}
+		else if(iter->second != 0)
+		{	
+			count++;
+			cur++;
+		}
+		else
+			break;
+	}
+	str = new char[count+1];
+	cur = start;
+	for (int i = 0; i < count; ++i)
+	{
+		iter = mem.find(cur);
+		str[i] = iter->second;
+		cur++;
+	}
+	str[count] = 0;
+	return str;
+}
 static int32_t sign_ext(int32_t imm, uint32_t width)
 {
 	int sign_bit = imm >> (width - 1);
@@ -86,7 +120,19 @@ int jal(uint32_t inst)
 		PC += 4;
 		ret = 1;
 	}
-	
+	else if((get_func_name(target)) && (strcmp(get_func_name(target), "puts") == 0))
+	{
+		
+		printf("%s\n", get_str(reg[10]));
+		PC += 4;
+		ret = 1;
+	}
+	else if((get_func_name(target)) && (strcmp(get_func_name(target), "printf") == 0))
+	{
+		printf("%s", get_str(reg[10]));
+		PC += 4;
+		ret = 1;
+	}
 	else
 	{
 		reg[rd] = PC + 4;

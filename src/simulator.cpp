@@ -60,6 +60,7 @@ int main(int argc, char const *argv[])
 	main_entry = read_elf(file);
 	exec_prog(main_entry);
 
+
 #ifdef DEBUG_MEMORY
 	print_mem();
 #endif
@@ -134,8 +135,9 @@ static void exec_prog(Elf32_Addr main_entry)
 					printf("\nMain function end.\n");
 					#endif
 
-					#ifdef DEBUG_REGISTER
+					#ifdef DEBUG_CONTENT
 					print_reg();
+					print_mem_data();
 					#endif
 
 					return;

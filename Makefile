@@ -16,7 +16,7 @@ clean:
 
 .PHONY:debug_all
 debug_all:
-	g++ -DDEBUG_HEADER -DDEBUG_MEMORY -DDEBUG_EXECUTION -DDEBUG_REGISTER -o simulator ./src/*.cpp ./src/*.h
+	g++ -DDEBUG_HEADER -DDEBUG_MEMORY -DDEBUG_EXECUTION -DDEBUG_CONTENT -o simulator ./src/*.cpp ./src/*.h
 
 .PHONY:debug_header
 debug_header:
@@ -30,9 +30,9 @@ debug_memory:
 debug_execution:
 	g++ -DDEBUG_EXECUTION -o simulator ./src/*.cpp ./src/*.h
 
-.PHONY:debug_register
-debug_register:
-	g++ -DDEBUG_REGISTER -o simulator ./src/*.cpp ./src/*.h
+.PHONY:debug_content
+debug_content:
+	g++ -DDEBUG_CONTENT -o simulator ./src/*.cpp ./src/*.h
 
 .PHONY:debug_single_step
 debug:
