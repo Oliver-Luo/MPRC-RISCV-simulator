@@ -79,9 +79,11 @@ static void exec_prog(Elf32_Addr main_entry)
 	printf("\n\nContent of Execution\n\n");
 #endif
 
-	#ifdef DEBUG
-		single_step = true;	
-	#endif
+#ifdef DEBUG
+	single_step = true;	
+#endif
+
+	PC = main_entry;
 		
 	while(true)
 	{
@@ -103,15 +105,28 @@ static void exec_prog(Elf32_Addr main_entry)
 			case AUIPC: auipc(cmd); break;
 			case JAL:
 			{
-				//If it is j instead of jal, then this is not a call
-				if (((cmd >> 7) & 0x1f) != 0)
-					func_stack++;
-				jal(cmd);
+				#ifdef DEBUG_EXECUTION
+				printf("func_stack: %d\n", func_stack);
+				#endif 
+
+				if (jal(cmd) == 0)
+				{
+					//If it is j instead of jal, then this is not a call
+					if (((cmd >> 7) & 0x1f) == 1)
+						func_stack++;
+				}
+
 				continue;
 			}
 			case JALR: 
 			{
-				func_stack--;
+				//If it is jr instead of jal, then this is not a ret 
+				if (((cmd >> 15) & 0x1f) == 1)
+					func_stack--;
+
+				#ifdef DEBUG_EXECUTION
+				printf("func_stack: %d\n", func_stack);
+				#endif 
 
 				if (func_stack == 0)
 				{

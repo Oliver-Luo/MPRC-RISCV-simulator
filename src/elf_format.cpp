@@ -34,7 +34,7 @@ static int init_reg(FILE *file);
 static void print_as_char(Elf32_Addr start_addr, uint32_t size);
 static void print_as_hex(Elf32_Addr start_addr, uint32_t size);
 
-Elf32_Addr get_func_addr(char *func_name)
+Elf32_Addr get_func_addr(const char *func_name)
 {
 	if (symbol_table == NULL || str_tbl == NULL || sec_hdrs == NULL)
 	{	printf("elf header info not inited!!\n");return 0;}
@@ -111,7 +111,9 @@ Elf32_Addr read_elf(FILE *file)
 
 	load_prog(file, elf_header.e_phnum);
 
-	return elf_header.e_entry;
+	//return elf_header.e_entry;
+	printf("main: %x\n", get_func_addr("main"));
+	return get_func_addr("main");
 }
 
 static Elf32_Ehdr read_elf_header(FILE *file)

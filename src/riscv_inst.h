@@ -12,7 +12,7 @@
 
 void lui(uint32_t inst);
 void auipc(uint32_t inst);
-void jal(uint32_t inst);
+int jal(uint32_t inst);
 void jalr(uint32_t inst);
 void beq(uint32_t inst);
 void bne(uint32_t inst);

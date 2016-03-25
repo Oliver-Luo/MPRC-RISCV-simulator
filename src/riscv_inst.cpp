@@ -10,9 +10,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <map>
 
 #include "riscv_inst.h"
+#include "elf_format.h"
 
 using namespace std;
 
@@ -68,20 +70,34 @@ void auipc(uint32_t inst)
 #endif
 }
 
-void jal(uint32_t inst)
+int jal(uint32_t inst)
 {
 	uint32_t rd = Rd(inst);
 	int32_t imm = ((inst & 0x80000000) >> 12) | ((inst & 0x7fe00000) >> 21)
 		| ((inst & 0x00100000) >> 10) | ((inst & 0x000ff000) >> 1);
 	imm = sign_ext(imm, 20);
 	uint32_t tmp_pc = PC;
+	uint32_t target = unsign_add_sign(PC, imm * 2);
+	int ret = 0;
 
-	reg[rd] = PC + 4;
-	PC = unsign_add_sign(PC, imm * 2);
+	if ((get_func_name(target)) && (strcmp(get_func_name(target), "putchar") == 0))
+	{
+		printf("%c", reg[10]);
+		PC += 4;
+		ret = 1;
+	}
+	
+	else
+	{
+		reg[rd] = PC + 4;
+		PC = target;
+	}
 
 #ifdef DEBUG_EXECUTION
 	printf("PC: %x, New PC: %x, inst: JAL, rd: %d(%d), imm: %d\n", tmp_pc, PC, rd,reg[rd],imm);
 #endif
+
+	return ret;
 }
 //?? whz why set the least-significant bit not the two?
 void jalr(uint32_t inst)
