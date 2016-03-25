@@ -75,7 +75,7 @@ void print_mem_data()
 		{
 			printf("the content of %s, print as char: \n", 
 				    &sh_str_tbl[sec_hdrs[i].sh_name]);
-			print_as_char(sec_hdrs[i].sh_addr, sec_hdrs[i].size);
+			print_as_char(sec_hdrs[i].sh_addr, sec_hdrs[i].sh_size);
 
 			printf("the content of %s, print as hex: \n", 
 					&sh_str_tbl[sec_hdrs[i].sh_name]);
