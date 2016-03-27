@@ -9,8 +9,10 @@
  */
 
 #include <stdio.h>
+ #include <iostream>
 #include <stdlib.h>
 #include <string.h>
+#include <string>
 #include <map>
 
 #include "riscv_inst.h"
@@ -61,6 +63,65 @@ static char *get_str(Elf32_Addr start)
 	str[count] = 0;
 	return str;
 }
+
+static const char *parse_str(const char *str)
+{
+	string parsed_str(str);
+	int len = parsed_str.length();
+	int count = 1;
+	for (int i = 0; i < len;)
+	{
+		if(parsed_str[i] == '%'  && i+1 < len)
+		{
+			if (parsed_str[i+1] == 'd')
+			{
+				char num_str[20];
+				sprintf(num_str, "%d", reg[10+count]);
+				parsed_str.replace(i, 2, num_str);
+				len = parsed_str.length();
+				i += 2;
+				count++;
+			}
+			else if (parsed_str[i+1] == 'u')
+			{
+				char num_str[20];
+				sprintf(num_str, "%u", reg[10+count]);
+				parsed_str.replace(i, 2, num_str);
+				len = parsed_str.length();
+				i += 2;
+				count++;
+			}
+			else if(parsed_str[i+1] == 'x')
+			{
+				char num_str[20];
+				sprintf(num_str, "%x", reg[10+count]);
+				parsed_str.replace(i, 2, num_str);
+				len = parsed_str.length();
+				i += 2;
+				count++;
+			}
+			else if (parsed_str[i+1] == 's')
+			{
+				parsed_str.replace(i, 2,get_str(reg[10+count]));
+				len = parsed_str.length();
+				i += 2;
+				count ++;
+			}
+			else
+			{
+				printf("format :%c unsuported!\n", parsed_str[i+1]);
+				i += 2;
+			}
+		
+		}
+		else
+			i++;
+	}
+
+	const char *tmp =  parsed_str.c_str();
+	return tmp;
+}
+
 static int32_t sign_ext(int32_t imm, uint32_t width)
 {
 	int sign_bit = imm >> (width - 1);
@@ -129,7 +190,8 @@ int jal(uint32_t inst)
 	}
 	else if((get_func_name(target)) && (strcmp(get_func_name(target), "printf") == 0))
 	{
-		printf("%s", get_str(reg[10]));
+		const char *out = parse_str(get_str(reg[10]));
+		printf("%s",out );
 		PC += 4;
 		ret = 1;
 	}
