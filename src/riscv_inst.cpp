@@ -174,7 +174,8 @@ int jal(uint32_t inst)
 	uint32_t tmp_pc = PC;
 	uint32_t target = unsign_add_sign(PC, imm * 2);
 	int ret = 0;
-
+//Do not inplement glib function
+#if 0
 	if ((get_func_name(target)) && (strcmp(get_func_name(target), "putchar") == 0))
 	{
 		printf("%c", reg[10]);
@@ -196,6 +197,7 @@ int jal(uint32_t inst)
 		ret = 1;
 	}
 	else
+#endif
 	{
 		reg[rd] = PC + 4;
 		PC = target;
@@ -461,9 +463,9 @@ void sh(uint32_t inst)
 		mem.insert(pair<uint32_t, uint8_t>(addr, value & 0xff));
 	else
 		iter->second = value & 0xff;
-	iter = mem.find(addr);
+	iter = mem.find(++addr);
 	if (iter == mem.end())
-		mem.insert(pair<uint32_t, uint8_t>(++addr, (value & 0xff00) >> 8));
+		mem.insert(pair<uint32_t, uint8_t>(addr, (value & 0xff00) >> 8));
 	else
 		iter->second = (value & 0xff00) >> 8;
 	
