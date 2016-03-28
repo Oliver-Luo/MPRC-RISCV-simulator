@@ -165,7 +165,7 @@ void auipc(uint32_t inst)
 #endif
 }
 
-int jal(uint32_t inst)
+void jal(uint32_t inst)
 {
 	uint32_t rd = Rd(inst);
 	int32_t imm = ((inst & 0x80000000) >> 12) | ((inst & 0x7fe00000) >> 21)
@@ -173,41 +173,13 @@ int jal(uint32_t inst)
 	imm = sign_ext(imm, 20);
 	uint32_t tmp_pc = PC;
 	uint32_t target = unsign_add_sign(PC, imm * 2);
-	int ret = 0;
-//Do not inplement glib function
-#if 0
-	if ((get_func_name(target)) && (strcmp(get_func_name(target), "putchar") == 0))
-	{
-		printf("%c", reg[10]);
-		PC += 4;
-		ret = 1;
-	}
-	else if((get_func_name(target)) && (strcmp(get_func_name(target), "puts") == 0))
-	{
-		
-		printf("%s\n", get_str(reg[10]));
-		PC += 4;
-		ret = 1;
-	}
-	else if((get_func_name(target)) && (strcmp(get_func_name(target), "printf") == 0))
-	{
-		const char *out = parse_str(get_str(reg[10]));
-		printf("%s",out );
-		PC += 4;
-		ret = 1;
-	}
-	else
-#endif
-	{
-		reg[rd] = PC + 4;
-		PC = target;
-	}
+
+	reg[rd] = PC + 4;
+	PC = target;
 
 #ifdef DEBUG_EXECUTION
 	printf("PC: %x, New PC: %x, inst: JAL, rd: %d(%d), imm: %d\n", tmp_pc, PC, rd,reg[rd],imm);
 #endif
-
-	return ret;
 }
 //?? whz why set the least-significant bit not the two?
 void jalr(uint32_t inst)
@@ -779,3 +751,10 @@ void riscv_and(uint32_t inst)
 #endif
 }
 
+int scall(void)
+{
+	if (reg[17] == 93)
+		return 0;
+	printf("System call unimplemented.\n");
+	printf("PC: %x, inst: SCALL\n", PC);
+}

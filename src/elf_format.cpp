@@ -114,8 +114,7 @@ Elf32_Addr read_elf(FILE *file)
 
 	load_prog(file, elf_header.e_phnum);
 
-	//return elf_header.e_entry;
-	return get_func_addr("main");
+	return elf_header.e_entry;
 }
 
 static Elf32_Ehdr read_elf_header(FILE *file)

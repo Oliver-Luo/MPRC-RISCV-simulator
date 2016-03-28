@@ -74,7 +74,6 @@ static void exec_prog(Elf32_Addr main_entry)
 {
 	uint32_t cmd = 0;
 	uint32_t opcode = 0;
-	uint32_t func_stack = 1;
 		
 #ifdef DEBUG_EXECUTION
 	printf("\n\nContent of Execution\n\n");
@@ -104,47 +103,8 @@ static void exec_prog(Elf32_Addr main_entry)
 			//TODO finish execute	
 			case LUI: lui(cmd); break;
 			case AUIPC: auipc(cmd); break;
-			case JAL:
-			{
-				#ifdef DEBUG_EXECUTION
-				printf("func_stack: %d\n", func_stack);
-				#endif 
-
-				if (jal(cmd) == 0)
-				{
-					//If it is j instead of jal, then this is not a call
-					if (((cmd >> 7) & 0x1f) == 1)
-						func_stack++;
-				}
-
-				continue;
-			}
-			case JALR: 
-			{
-				//If it is jr instead of jal, then this is not a ret 
-				if (((cmd >> 15) & 0x1f) == 1)
-					func_stack--;
-
-				#ifdef DEBUG_EXECUTION
-				printf("func_stack: %d\n", func_stack);
-				#endif 
-
-				if (func_stack == 0)
-				{
-					#ifdef DEBUG_EXECUTION
-					printf("\nMain function end.\n");
-					#endif
-
-					#ifdef DEBUG_CONTENT
-					print_reg();
-					print_mem_data();
-					#endif
-
-					return;
-				}
-				jalr(cmd);
-				continue;
-			}
+			case JAL: jal(cmd); continue;
+			case JALR: jalr(cmd); continue;
 			case BEQ: beq(cmd); continue;
 			case BNE: bne(cmd); continue;
 			case BLT: blt(cmd); continue;
@@ -179,14 +139,33 @@ static void exec_prog(Elf32_Addr main_entry)
 			case OR: riscv_or(cmd); break;
 			case AND: riscv_and(cmd); break;
 
+			case SCALL:
+			{
+				if (scall() == 0)
+				{
+					#ifdef DEBUG_EXECUTION
+					printf("\nExecution end.\n");
+					#endif
+
+					#ifdef DEBUG_CONTENT
+					print_reg();
+					print_mem_data();
+					#endif
+
+					return;
+				}
+
+				break;
+			}
+
 			case UIMP:
 			{
-				printf("Encountered unimplemented instruction.\n");
+				printf("Encountered unimplemented instruction: 0x%x\n", cmd);
 				exit(EXIT_FAILURE);
 			}
 			case ILL: 
 			{
-				printf("Illegal instruction.\n");
+				printf("Illegal instruction: 0x%x\n", cmd);
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -310,8 +289,20 @@ static unsigned int decode(unsigned int single_inst)
 			}
 			break;	
 		}
-		case 0xf:
-		case 0x73: inst_type = UIMP; break;
+		case 0xf: inst_type = UIMP; break;
+		case 0x73:
+		{
+			if ((single_inst & 0xffffff80) == 0)
+			{
+				inst_type = SCALL;
+				break;
+			}
+			else
+			{
+				inst_type = UIMP;
+				break;
+			}
+		}
 		default: inst_type = ILL; break; 
 	}
 	
@@ -400,8 +391,10 @@ uint8_t retrieve_or_error(uint32_t addr)
 	iter = mem.find(addr);
 	if (iter == mem.end())
 	{
+		//TODO
 		printf("Access address not in the memory.\n");
-		exit(EXIT_FAILURE);
+		return 0;
+		//exit(EXIT_FAILURE);
 	}
 	
 	return iter->second;

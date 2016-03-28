@@ -52,7 +52,11 @@
 #if 0
 #define FENCE 37
 #define FENCE_I 38
+#endif
+
 #define SCALL 39
+
+#if 0
 #define SBREAK 40
 #define RDCYCLE 41
 #define RDCYCLEH 42
