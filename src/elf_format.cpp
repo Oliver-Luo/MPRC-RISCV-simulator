@@ -320,7 +320,10 @@ static int find_data_sec(int begin)
 static int init_reg(FILE *file)
 {	
 	for (int i = 0; i < REGSIZE; i++)
+	{
 		reg[i] = 0;
+		f_reg[i] = 0;
+	}
 
 	PC = elf_header.e_entry;
 

@@ -23,7 +23,7 @@ using namespace std;
 #define	REGSIZE	32
 
 uint32_t reg[REGSIZE];
-uint32_t f_reg[REGSIZE];
+uint64_t f_reg[REGSIZE];
 Elf32_Addr PC;
 map<Elf32_Addr, uint8_t> mem;
 set<uint32_t> breakpoints;

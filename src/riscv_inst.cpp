@@ -21,6 +21,7 @@
 using namespace std;
 
 extern uint32_t reg[];
+extern uint64_t f_reg[];
 extern uint32_t PC;
 extern map<uint32_t, uint8_t> mem;
 uint8_t retrieve_or_error(uint32_t addr);
@@ -780,8 +781,8 @@ int scall(void)
 		case 64: sys_write();break;
 		default: 
 		{
-			//printf("System call %d in addr: %x unimplemented.\n", reg[17], PC);
-			//printf("PC: %x, inst: SCALL num: %d\n", PC, reg[17]);
+			printf("System call %d in addr: %x unimplemented.\n", reg[17], PC);
+			printf("PC: %x, inst: SCALL num: %d\n", PC, reg[17]);
 			break;
 		}
 	}
@@ -799,9 +800,20 @@ void flw(uint32_t inst)
 }
 void fld(uint32_t inst)
 {
-	printf("FLD called, but unimplemented\n");
+	uint32_t rd = Rd(inst);
+	uint32_t rs1 = Rs1(inst);
+	int32_t imm = sign_ext((inst >> 20), 12);
+	uint32_t addr = unsign_add_sign(reg[rs1], imm);
+	uint64_t value = 0;
+	int i = 0;
+	
+	for (i = 0; i < 8; i++)
+		value = value | ((retrieve_or_error(addr++)) << (i * 8));
+
+	f_reg[rd] = value;
+	
 #ifdef DEBUG_EXECUTION
-	printf("PC: %x", PC);
+	printf("PC: %x, inst: FLD, rd(f_reg): %d(%lld), rs1: %d(%d), imm: %d\n", PC, rd, f_reg[rd], rs1, reg[rs1], imm);
 #endif
 }
 void fsw(uint32_t inst)
@@ -813,9 +825,27 @@ void fsw(uint32_t inst)
 }
 void fsd(uint32_t inst)
 {
-	printf("FSD called, but unimplemented\n");
+	uint32_t rs1 = Rs1(inst);
+	uint32_t rs2 = Rs2(inst);
+	int32_t imm = sign_ext((((inst >> 20) & 0x00000fe0) | ((inst >> 7) & 0x0000001f)), 12);
+	uint32_t addr = unsign_add_sign(reg[rs1], imm);
+	uint64_t value = f_reg[rs2];
+	int i = 0;
+
+	for (i = 0; i < 8; i++)
+	{
+		map<uint32_t, uint8_t>::iterator iter;
+		iter = mem.find(addr);
+		if (iter == mem.end())
+			mem.insert(pair<uint32_t, uint8_t>(addr, (f_reg[rs2] & (0xff << (i * 8))) >> (i * 8)));
+		else
+			iter->second = (f_reg[rs2] & (0xff << (i * 8))) >> (i * 8);
+		addr++;
+	}
+
+	//printf("FSD called, but unimplemented\n");
 #ifdef DEBUG_EXECUTION
-	printf("PC: %x", PC);
+	printf("PC: %x, inst: FSD, rs1(reg): %d(%d), rs2(f_reg): %d(%lld), imm: %d\n", PC, rs1, reg[rs1], rs2, f_reg[rs2], imm);
 #endif
 }
 //printf("PC: %x, inst: SH, frs1: %d(%d), frs2: %d(%d), imm: %d\n", PC, rs1,freg[rs1], rs2,freg[rs2], imm);
