@@ -23,6 +23,7 @@ using namespace std;
 #define	REGSIZE	32
 
 uint32_t reg[REGSIZE];
+uint32_t f_reg[REGSIZE];
 Elf32_Addr PC;
 map<Elf32_Addr, uint8_t> mem;
 set<uint32_t> breakpoints;
@@ -59,7 +60,6 @@ int main(int argc, char const *argv[])
 
 	main_entry = read_elf(file);
 	exec_prog(main_entry);
-
 
 #ifdef DEBUG_MEMORY
 	print_mem();
@@ -138,7 +138,10 @@ static void exec_prog(Elf32_Addr main_entry)
 			case SRA: sra(cmd); break;
 			case OR: riscv_or(cmd); break;
 			case AND: riscv_and(cmd); break;
-
+			case FLW:flw(cmd); break;
+			case FLD:fld(cmd); break;
+			case FSW:fsw(cmd); break;
+			case FSD: fsd(cmd); break;
 			case SCALL:
 			{
 				if (scall() == 0)
@@ -165,7 +168,7 @@ static void exec_prog(Elf32_Addr main_entry)
 			}
 			case ILL: 
 			{
-				printf("Illegal instruction: 0x%x\n", cmd);
+				printf("Illegal instruction: pc:0x%x  cmd: 0x%x\n", PC, cmd);
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -289,6 +292,29 @@ static unsigned int decode(unsigned int single_inst)
 			}
 			break;	
 		}
+		
+		case 0x7:
+		{
+			switch ((single_inst & 0x7000) >> 12)
+			{
+				case 0x2: inst_type = FLW; break;
+				case 0x3: inst_type = FLD; break;
+				default: inst_type = ILL; break;
+			}
+			break;
+		}
+
+		case 0x27:
+		{
+			switch ((single_inst & 0x7000) >> 12)
+			{
+				case 0x2: inst_type = FSW; break;
+				case 0x3: inst_type = FSD; break;
+				default: inst_type = ILL; break;
+			}
+			break;
+		}
+		
 		case 0xf: inst_type = UIMP; break;
 		case 0x73:
 		{
@@ -392,7 +418,9 @@ uint8_t retrieve_or_error(uint32_t addr)
 	if (iter == mem.end())
 	{
 		//TODO
+#ifdef DEBUG_MEMORY
 		printf("Access address not in the memory.\n");
+#endif
 		return 0;
 		//exit(EXIT_FAILURE);
 	}

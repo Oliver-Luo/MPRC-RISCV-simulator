@@ -29,6 +29,21 @@ uint8_t retrieve_or_error(uint32_t addr);
 #define Rs1(inst) ((inst >> 15) & 0x1f)
 #define Rs2(inst) ((inst >> 20) & 0x1f)
 
+static void sys_write()
+{
+	Elf32_Addr cur_addr = reg[11];
+	Elf32_Addr limit_addr = reg[12]+reg[11];
+	//printf("entered\n");
+	for(int i = cur_addr; i < limit_addr; i++)
+	{
+		char a = retrieve_or_error(i);
+		printf("%c", a);
+
+	}
+	reg[10] = reg[12];
+}
+
+/* not used in this edit.
 static char *get_str(Elf32_Addr start)
 {
 	map<uint32_t, uint8_t>::iterator iter;
@@ -121,7 +136,7 @@ static const char *parse_str(const char *str)
 	const char *tmp =  parsed_str.c_str();
 	return tmp;
 }
-
+*/
 static int32_t sign_ext(int32_t imm, uint32_t width)
 {
 	int sign_bit = imm >> (width - 1);
@@ -755,6 +770,52 @@ int scall(void)
 {
 	if (reg[17] == 93)
 		return 0;
-	printf("System call unimplemented.\n");
-	printf("PC: %x, inst: SCALL\n", PC);
+	// for (int i = 10; i < 18; ++i)
+	// {
+	// 	printf("%x    ", reg[i]);
+	// }
+	// printf("\n");
+	switch(reg[17])
+	{
+		case 64: sys_write();break;
+		default: 
+		{
+			//printf("System call %d in addr: %x unimplemented.\n", reg[17], PC);
+			//printf("PC: %x, inst: SCALL num: %d\n", PC, reg[17]);
+			break;
+		}
+	}
+#ifdef DEBUG_EXECUTION
+	printf("SCALL, num:%x  executed!	\n", reg[17]);
+#endif
+
 }
+void flw(uint32_t inst)
+{
+	printf("FLW called, but unimplemented\n");
+#ifdef DEBUG_EXECUTION
+	printf("PC: %x", PC);
+#endif
+}
+void fld(uint32_t inst)
+{
+	printf("FLD called, but unimplemented\n");
+#ifdef DEBUG_EXECUTION
+	printf("PC: %x", PC);
+#endif
+}
+void fsw(uint32_t inst)
+{
+	printf("FSW called, but unimplemented\n");
+#ifdef DEBUG_EXECUTION
+	printf("PC: %x", PC);
+#endif
+}
+void fsd(uint32_t inst)
+{
+	printf("FSD called, but unimplemented\n");
+#ifdef DEBUG_EXECUTION
+	printf("PC: %x", PC);
+#endif
+}
+//printf("PC: %x, inst: SH, frs1: %d(%d), frs2: %d(%d), imm: %d\n", PC, rs1,freg[rs1], rs2,freg[rs2], imm);

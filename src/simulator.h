@@ -48,13 +48,16 @@
 #define SRA 34
 #define OR 35
 #define AND 36
-
+#define FLW 37
+#define FLD 38
+#define FSW 39
+#define FSD 40
 #if 0
 #define FENCE 37
 #define FENCE_I 38
 #endif
 
-#define SCALL 39
+#define SCALL 45
 
 #if 0
 #define SBREAK 40
@@ -68,5 +71,6 @@
 
 #define UIMP 47
 #define ILL 48
+
 
 #endif /* __SIMULATOR_H */

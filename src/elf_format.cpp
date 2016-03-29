@@ -10,6 +10,7 @@ using namespace std;
 #define	REGSIZE	32
 
 extern uint32_t reg[];
+extern uint32_t f_reg[];
 extern uint32_t PC;
 extern map<uint32_t, uint8_t> mem;
 

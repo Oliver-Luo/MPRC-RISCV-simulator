@@ -47,5 +47,8 @@ void srl(uint32_t inst);
 void sra(uint32_t inst);
 void riscv_or(uint32_t inst);
 void riscv_and(uint32_t inst);
-
+void flw(uint32_t inst);
+void fld(uint32_t inst);
+void fsw(uint32_t inst);
+void fsd(uint32_t inst);
 int scall(void);
