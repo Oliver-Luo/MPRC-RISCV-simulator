@@ -74,6 +74,7 @@ static void exec_prog(Elf32_Addr main_entry)
 {
 	uint32_t cmd = 0;
 	uint32_t opcode = 0;
+	uint32_t inst_count = 0;
 		
 #ifdef DEBUG_EXECUTION
 	printf("\n\nContent of Execution\n\n");
@@ -95,6 +96,8 @@ static void exec_prog(Elf32_Addr main_entry)
 			debug(PC, cmd);
 
 		opcode = decode(cmd);
+
+		inst_count++;
 
 		reg[0] = 0; //Make sure x0 = 0 after every execution.
 
@@ -160,6 +163,8 @@ static void exec_prog(Elf32_Addr main_entry)
 					printf("\nExecution end.\n");
 					#endif
 
+					printf("\nInsctuction count: %d\n", inst_count);
+
 					#ifdef DEBUG_CONTENT
 					print_reg();
 					print_mem_data();
@@ -179,6 +184,7 @@ static void exec_prog(Elf32_Addr main_entry)
 			case ILL: 
 			{
 				printf("Illegal instruction: pc:0x%x  cmd: 0x%x\n", PC, cmd);
+				printf("\nInsctuction count: %d\n", inst_count);
 				exit(EXIT_FAILURE);
 			}
 		}
