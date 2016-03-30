@@ -144,6 +144,14 @@ static void exec_prog(Elf32_Addr main_entry)
 			case FSD: fsd(cmd); break;
 			case REMU: remu(cmd); break;
 			case DIVU: divu(cmd); break;
+			case DIV: div(cmd);  break;
+			case MUL:mul(cmd); break;
+			case FCVT_S_W: fcvt_s_w(cmd); break;
+			case FCVT_D_S: fcvt_d_s(cmd); break;
+			case FCVT_S_D: fcvt_s_d(cmd); break;
+			case FMUL_D: fmul_d(cmd); break;
+			case FDIV_D: fdiv_d(cmd); break;
+			case FDIV_S: fdiv_s(cmd); break;
 			case SCALL:
 			{
 				if (scall() == 0)
@@ -262,6 +270,7 @@ static unsigned int decode(unsigned int single_inst)
 						inst_type = SRAI; 
 					break;
 				}
+				default: inst_type = ILL; break;
 			}
 			break;
 		}
@@ -274,6 +283,7 @@ static unsigned int decode(unsigned int single_inst)
 					switch( ((single_inst)>>25)&0x7f)
 					{
 						case 0x0: inst_type = ADD; break;
+						case 0x1: inst_type = MUL; break;
 						case 0x20: inst_type = SUB; break;
 						default: inst_type = ILL; break;
 					}
@@ -311,6 +321,7 @@ static unsigned int decode(unsigned int single_inst)
 					switch( ((single_inst)>>25)&0x7f)
 					{
 						case 0x0: inst_type = XOR; break;
+						case 0x1: inst_type = DIV;  break;
 						default: inst_type = ILL; break;
 					}
 					break;
@@ -345,10 +356,49 @@ static unsigned int decode(unsigned int single_inst)
 					}
 					break;
 				}
+				default: inst_type = ILL; break;
 			}
 			break;	
 		}
-		
+		case 0x53:
+		{
+			switch( ((single_inst)>>25)&0x7f)
+			{
+				case 0x68:
+				{
+					switch ( ((single_inst) >> 20) & 0x1f)
+					{
+
+						case 0x0: {printf("come here\n"); inst_type = FCVT_S_W; break;}
+						default: inst_type = ILL; break;
+					}
+					break;
+				}
+				case 0x20:
+				{
+					switch ( ((single_inst) >> 20) & 0x1f)
+					{
+						case 0x1: inst_type = FCVT_S_D; break;
+						default: inst_type = ILL; break;
+					}
+					break;
+				}
+				case 0x21:
+				{
+					switch ( ((single_inst) >> 20) & 0x1f)
+					{
+						case 0x0: inst_type = FCVT_D_S; break;
+						default: inst_type = ILL; break;
+					}
+					break;
+				}
+				case 0x9: inst_type = FMUL_D; break;
+				case 0xC: inst_type = FDIV_S; break;
+				case 0xD: inst_type = FDIV_D; break;
+				default: inst_type = ILL; break;
+			}
+			break;
+		}
 		case 0x7:
 		{
 			switch ((single_inst & 0x7000) >> 12)

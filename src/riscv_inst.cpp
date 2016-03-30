@@ -30,6 +30,7 @@ uint8_t retrieve_or_error(uint32_t addr);
 #define Rs1(inst) ((inst >> 15) & 0x1f)
 #define Rs2(inst) ((inst >> 20) & 0x1f)
 
+// 80 sys_fstat ; 214 sys_brk; 57 sys_close unimplemented
 static void sys_write()
 {
 	Elf32_Addr cur_addr = reg[11];
@@ -791,6 +792,7 @@ int scall(void)
 #endif
 
 }
+
 void flw(uint32_t inst)
 {
 	printf("FLW called, but unimplemented\n");
@@ -798,6 +800,7 @@ void flw(uint32_t inst)
 	printf("PC: %x", PC);
 #endif
 }
+
 void fld(uint32_t inst)
 {
 	uint32_t rd = Rd(inst);
@@ -816,6 +819,7 @@ void fld(uint32_t inst)
 	printf("PC: %x, inst: FLD, rd(f_reg): %d(%lld), rs1: %d(%d), imm: %d\n", PC, rd, f_reg[rd], rs1, reg[rs1], imm);
 #endif
 }
+
 void fsw(uint32_t inst)
 {
 	printf("FSW called, but unimplemented\n");
@@ -823,6 +827,7 @@ void fsw(uint32_t inst)
 	printf("PC: %x", PC);
 #endif
 }
+
 void fsd(uint32_t inst)
 {
 	uint32_t rs1 = Rs1(inst);
@@ -848,13 +853,112 @@ void fsd(uint32_t inst)
 	printf("PC: %x, inst: FSD, rs1(reg): %d(%d), rs2(f_reg): %d(%lld), imm: %d\n", PC, rs1, reg[rs1], rs2, f_reg[rs2], imm);
 #endif
 }
+
 void remu(uint32_t inst)
 {
-	printf("%x, remu have not been implemented yet!\n", PC);
-	
+	uint32_t rd = Rd(inst);
+	uint32_t rs1 = Rs1(inst);
+	uint32_t rs2 = Rs2(inst);
+
+	reg[rd] = reg[rs1] % reg[rs2];
+
+#ifdef DEBUG_EXECUTION
+	printf("PC: %x, inst: REMU, rd: %d(%d), rs1: %d(%d) , rs2: %d(%d)\n", PC, rd,reg[rd] ,rs1,reg[rs1], rs2,reg[rs2]);
+#endif	
+
 }
+
+void div(uint32_t inst)
+{
+
+	uint32_t rd = Rd(inst);
+	uint32_t rs1 = Rs1(inst);
+	uint32_t rs2 = Rs2(inst);
+
+	int value_rs1 = reg[rs1];
+	int value_rs2 = reg[rs2];
+	int value_rd = value_rs1 / value_rs2;
+
+	reg[rd] = value_rd;
+
+#ifdef DEBUG_EXECUTION
+	printf("PC: %x, inst: DIV, rd: %d(%d), rs1: %d(%d) , rs2: %d(%d)\n", PC, rd,reg[rd] ,rs1,reg[rs1], rs2,reg[rs2]);
+#endif
+}
+
 void divu(uint32_t inst)
 {
-	printf("%x, divu have not been implemented yet!\n", PC);
+	uint32_t rd = Rd(inst);
+	uint32_t rs1 = Rs1(inst);
+	uint32_t rs2 = Rs2(inst);
+
+	reg[rd] = reg[rs1] / reg[rs2];
+#ifdef DEBUG_EXECUTION
+	printf("PC: %x, inst: DIVU, rd: %d(%d), rs1: %d(%d) , rs2: %d(%d)\n", PC, rd,reg[rd] ,rs1,reg[rs1], rs2,reg[rs2]);
+#endif
+}
+
+void mul(uint32_t inst)
+{
+	uint32_t rd = Rd(inst);
+	uint32_t rs1 = Rs1(inst);
+	uint32_t rs2 = Rs2(inst);
+	uint64_t value = reg[rs1] * reg[rs2];
+	reg[rd] = value & 0xffffffff;
+#ifdef DEBUG_EXECUTION
+	printf("PC: %x, inst: MUL, rd: %d(%d), rs1: %d(%d) , rs2: %d(%d)\n", PC, rd,reg[rd] ,rs1,reg[rs1], rs2,reg[rs2]);
+#endif
+}
+void fcvt_s_w(uint32_t inst)
+{
+	printf("FCVT_S_W called, but unimplemented\n");
+#ifdef DEBUG_EXECUTION
+	printf("PC: %x", PC);
+#endif
+}
+
+void fcvt_d_s(uint32_t inst)
+{
+	printf("FCVT_D_S called, but unimplemented\n");
+#ifdef DEBUG_EXECUTION
+	printf("PC: %x", PC);
+#endif
+}
+
+void fcvt_s_d(uint32_t inst)
+{
+	printf("FCVT_S_D called, but unimplemented\n");
+#ifdef DEBUG_EXECUTION
+	printf("PC: %x", PC);
+#endif
+}
+
+void fmul_d(uint32_t inst)
+{
+	printf("FMUL_D called, but unimplemented\n");
+#ifdef DEBUG_EXECUTION
+	printf("PC: %x", PC);
+#endif
+}
+
+void fdiv_d(uint32_t inst)
+{
+	printf("FDIV_D called, but unimplemented\n");
+#ifdef DEBUG_EXECUTION
+	printf("PC: %x", PC);
+#endif
+}
+
+void fdiv_s(uint32_t inst)
+{
+	printf("FDIV_S called, but unimplemented\n");
+#ifdef DEBUG_EXECUTION
+	printf("PC: %x", PC);
+#endif
+}
+
+void fsgnj_d(uint32_t inst)
+{
+
 }
 //printf("PC: %x, inst: SH, frs1: %d(%d), frs2: %d(%d), imm: %d\n", PC, rs1,freg[rs1], rs2,freg[rs2], imm);
