@@ -9,11 +9,12 @@
  */
 
 #include <stdio.h>
- #include <iostream>
+#include <iostream>
 #include <stdlib.h>
 #include <string.h>
 #include <string>
 #include <map>
+#include <sys/time.h>
 
 #include "riscv_inst.h"
 #include "elf_format.h"
@@ -43,6 +44,21 @@ static void sys_write()
 
 	}
 	reg[10] = reg[12];
+}
+ 
+static void sys_gettimeofday()
+{
+	struct timeval t;
+	if (gettimeofday(&t, NULL) == 0)
+	{
+		reg[10] = t.tv_sec;
+		reg[11] = t.tv_usec;
+	}
+	else
+	{
+		printf("The call to func gettimeofday error.\n");
+		exit(EXIT_FAILURE);
+	}
 }
 
 /* not used in this edit.
@@ -779,7 +795,8 @@ int scall(void)
 	// printf("\n");
 	switch(reg[17])
 	{
-		case 64: sys_write();break;
+		case 64: sys_write(); break;
+		case 169: sys_gettimeofday; break;
 		default: 
 		{
 			printf("System call %d in addr: %x unimplemented.\n", reg[17], PC);
