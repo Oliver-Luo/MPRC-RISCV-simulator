@@ -52,6 +52,9 @@
 #define FLD 38
 #define FSW 39
 #define FSD 40
+#define REMU 41
+# define DIVU 42
+//#define 
 #if 0
 #define FENCE 37
 #define FENCE_I 38

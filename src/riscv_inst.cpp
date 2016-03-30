@@ -848,4 +848,13 @@ void fsd(uint32_t inst)
 	printf("PC: %x, inst: FSD, rs1(reg): %d(%d), rs2(f_reg): %d(%lld), imm: %d\n", PC, rs1, reg[rs1], rs2, f_reg[rs2], imm);
 #endif
 }
+void remu(uint32_t inst)
+{
+	printf("%x, remu have not been implemented yet!\n", PC);
+	
+}
+void divu(uint32_t inst)
+{
+	printf("%x, divu have not been implemented yet!\n", PC);
+}
 //printf("PC: %x, inst: SH, frs1: %d(%d), frs2: %d(%d), imm: %d\n", PC, rs1,freg[rs1], rs2,freg[rs2], imm);

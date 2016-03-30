@@ -51,4 +51,6 @@ void flw(uint32_t inst);
 void fld(uint32_t inst);
 void fsw(uint32_t inst);
 void fsd(uint32_t inst);
+void remu(uint32_t inst);
+void divu(uint32_t inst);
 int scall(void);

@@ -142,6 +142,8 @@ static void exec_prog(Elf32_Addr main_entry)
 			case FLD:fld(cmd); break;
 			case FSW:fsw(cmd); break;
 			case FSD: fsd(cmd); break;
+			case REMU: remu(cmd); break;
+			case DIVU: divu(cmd); break;
 			case SCALL:
 			{
 				if (scall() == 0)
@@ -269,26 +271,80 @@ static unsigned int decode(unsigned int single_inst)
 			{
 				case 0x0:	
 				{
-					if (!(single_inst & 0x40000000))
-						inst_type = ADD;
-					else
-						inst_type = SUB; 
+					switch( ((single_inst)>>25)&0x7f)
+					{
+						case 0x0: inst_type = ADD; break;
+						case 0x20: inst_type = SUB; break;
+						default: inst_type = ILL; break;
+					}
 					break;
 				}
-				case 0x1: inst_type = SLL; break;
-				case 0x2: inst_type = SLT; break;
-				case 0x3: inst_type = SLTU; break;
-				case 0x4: inst_type = XOR; break;
+				case 0x1: 
+				{
+					switch( ((single_inst)>>25)&0x7f)
+					{
+						case 0x0: inst_type = SLL; break;
+						default: inst_type = ILL; break;
+					}
+					break;
+				}
+				case 0x2: 
+				{
+					switch( ((single_inst)>>25)&0x7f)
+					{	
+						case 0x0: inst_type = SLT; break;
+						default: inst_type = ILL; break;
+					}
+					break;
+				}
+				case 0x3: 
+				{
+					switch( ((single_inst)>>25)&0x7f)
+					{
+						case 0x0: inst_type = SLTU; break;
+						default: inst_type = ILL; break;
+					}
+					break;
+				}
+				case 0x4: 
+				{
+					switch( ((single_inst)>>25)&0x7f)
+					{
+						case 0x0: inst_type = XOR; break;
+						default: inst_type = ILL; break;
+					}
+					break;
+				}
 				case 0x5:
 				{
-					if (!(single_inst & 0x40000000))
-						inst_type = SRL;
-					else
-						inst_type = SRA; 
+					switch( ((single_inst)>>25)&0x7f)
+					{
+						case 0x0: inst_type = SRL; break;
+						case 0x20: inst_type = SRA; break;
+						case 0x1: inst_type = DIVU; break;
+						default: inst_type = ILL; break;
+					}
 					break;
 				}
-				case 0x6: inst_type = OR; break;
-				case 0x7: inst_type = AND; break;
+				case 0x6: 
+				{
+					switch( ((single_inst)>>25)&0x7f)
+					{
+						case 0x0: inst_type = OR; break;
+						default: inst_type = ILL; break;
+					}
+					break;
+				}
+				case 0x7:
+				{
+					switch( ((single_inst)>>25)&0x7f)
+					{
+						case 0x0: inst_type = AND; break;
+						case 0x1: inst_type = REMU; break;
+						default: inst_type = ILL;  break;
+					}
+					break;
+				}
 			}
 			break;	
 		}
