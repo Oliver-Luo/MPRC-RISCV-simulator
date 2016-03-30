@@ -62,6 +62,7 @@ void fmul_d(uint32_t inst);
 void fdiv_d(uint32_t inst);
 void fdiv_s(uint32_t inst);
 void fsgnj_d(uint32_t inst);
+void fmv_s_x(uint32_t inst);
 int scall(void);
 // fcvt.s.w	fa
 // fcvt.d.s	fa

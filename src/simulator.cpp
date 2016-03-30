@@ -155,6 +155,7 @@ static void exec_prog(Elf32_Addr main_entry)
 			case FMUL_D: fmul_d(cmd); break;
 			case FDIV_D: fdiv_d(cmd); break;
 			case FDIV_S: fdiv_s(cmd); break;
+			case FMV_S_X: fmv_s_x(cmd); break;
 			case SCALL:
 			{
 				if (scall() == 0)
@@ -401,6 +402,7 @@ static unsigned int decode(unsigned int single_inst)
 				case 0x9: inst_type = FMUL_D; break;
 				case 0xC: inst_type = FDIV_S; break;
 				case 0xD: inst_type = FDIV_D; break;
+				case 0x78: inst_type = FMV_S_X; break;
 				default: inst_type = ILL; break;
 			}
 			break;

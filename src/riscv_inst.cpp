@@ -978,4 +978,13 @@ void fsgnj_d(uint32_t inst)
 {
 
 }
+
+void fmv_s_x(uint32_t inst)
+{
+	printf("FMV.S.X called, but unimplemented\n");
+#ifdef DEBUG_EXECUTION
+	printf("PC: %x", PC);
+#endif
+}
+	
 //printf("PC: %x, inst: SH, frs1: %d(%d), frs2: %d(%d), imm: %d\n", PC, rs1,freg[rs1], rs2,freg[rs2], imm);
