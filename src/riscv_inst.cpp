@@ -48,11 +48,25 @@ static void sys_write()
  
 static void sys_gettimeofday()
 {
+	int i = 0;
 	struct timeval t;
 	if (gettimeofday(&t, NULL) == 0)
 	{
-		reg[10] = t.tv_sec;
-		reg[11] = t.tv_usec;
+		map<uint32_t, uint8_t>::iterator iter;
+		for (i = 0; i < 4; i++)
+		{
+			iter = mem.find(reg[10] + i);
+			if (iter == mem.end())
+				mem.insert(pair<uint32_t, uint8_t>(reg[10] + i, (t.tv_sec >> (i * 8)) & 0xff));
+			else
+				iter->second = (t.tv_sec >> (i * 8)) & 0xff;
+
+			iter = mem.find(reg[10] + i + 4);
+			if (iter == mem.end())
+				mem.insert(pair<uint32_t, uint8_t>(reg[10] + i + 4, (t.tv_usec >> (i * 8)) & 0xff));
+			else
+				iter->second = (t.tv_usec >> (i * 8)) & 0xff;
+		}
 	}
 	else
 	{
@@ -798,7 +812,7 @@ int scall(void)
 		//TODO Finish some syscalls
 		case 64: sys_write(); break;
 		case 80: break;
-		case 169: sys_gettimeofday; break;
+		case 169: sys_gettimeofday(); break;
 		case 214: break;
 		default: 
 		{
