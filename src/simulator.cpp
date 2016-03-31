@@ -155,7 +155,21 @@ static void exec_prog(Elf32_Addr main_entry)
 			case FMUL_D: fmul_d(cmd); break;
 			case FDIV_D: fdiv_d(cmd); break;
 			case FDIV_S: fdiv_s(cmd); break;
-			case FMV_S_X: fmv_s_x(cmd); break;
+			case FMV_S_X:
+			{
+					#ifdef DEBUG_EXECUTION
+					printf("\nExecution end.\n");
+					#endif
+
+					printf("\nInsctuction count: %d\n", inst_count);
+
+					#ifdef DEBUG_CONTENT
+					print_reg();
+					print_mem_data();
+					#endif
+
+					return;
+			}
 			case SCALL:
 			{
 				if (scall() == 0)
@@ -471,8 +485,23 @@ static void debug(uint32_t pc, uint32_t cmd)
 			single_step = true;
 			return;
 		}
-		else if (strcmp(token, "p") == 0)
+		else if (strcmp(token, "print_reg") == 0)
 			print_reg();
+		else if (strcmp(token, "print_mem") == 0)
+		{
+			token = strtok(NULL, " \t\n");
+			if (strtok == NULL)
+				continue;
+			addr = strtoll(token, NULL, 16);
+
+			map<uint32_t, uint8_t>::iterator iter;
+			iter = mem.find(addr);
+			if ((addr != 0) && (iter != mem.end()))
+			{
+				printf("Addr: %x, Mem: %x\n", iter->first, iter->second);
+				continue;
+			}
+		}
 		else if (strcmp(token, "exit") == 0)
 			exit(0);
 		else if (strcmp(token, "r") == 0)
@@ -491,16 +520,18 @@ static void debug(uint32_t pc, uint32_t cmd)
 			iter = mem.find(addr);
 			if ((addr != 0) && (iter != mem.end()))
 			{
-				printf("%s: %x\n", token, addr);
 				breakpoints.insert(addr);
-				return;
+				printf("Breakpoint added. Addr: %x\n", addr);
+				continue;
 
 			}
 			else if (get_func_addr(token))
 			{
-				printf("%s: %x\n", token, get_func_addr(token));
-				breakpoints.insert(get_func_addr(token));
-				return;
+				addr = get_func_addr(token);
+				printf("%s: %x\n", token, addr);
+				breakpoints.insert(addr);
+				printf("Breakpoint added. Func: %s, Addr: %x\n", token, addr);
+				continue;
 			}
 			else
 			{
@@ -548,7 +579,7 @@ static void print_reg(void)
 
 	printf("\n\nContent of Register:\n\n");
 	for (i = 0; i < 32; i++)
-		printf("Reg[%d] = %d\n", i, reg[i]);
+		printf("Reg[%d] = %d | 0x%x\n", i, reg[i], reg[i]);
 	
 	return;
 }
