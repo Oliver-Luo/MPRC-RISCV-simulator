@@ -795,8 +795,11 @@ int scall(void)
 	// printf("\n");
 	switch(reg[17])
 	{
+		//TODO Finish some syscalls
 		case 64: sys_write(); break;
+		case 80: break;
 		case 169: sys_gettimeofday; break;
+		case 214: break;
 		default: 
 		{
 			printf("System call %d in addr: %x unimplemented.\n", reg[17], PC);
