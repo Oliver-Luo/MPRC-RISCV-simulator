@@ -46,6 +46,28 @@ static void sys_write()
 	reg[10] = reg[12];
 }
  
+static void sys_read()
+{
+	int i = 0;
+	char temp_str[1024];
+	uint32_t len;
+	scanf("%s", temp_str);
+	len = strlen(temp_str);
+	map<uint32_t, uint8_t>::iterator iter;
+	for (i = 0; i <= len; i++)
+	{
+		iter = mem.find(reg[11] + i);
+		if (iter == mem.end())
+			mem.insert(pair<uint32_t, uint8_t>(reg[11] + i, temp_str[i]));
+		else
+			iter->second = temp_str[i];
+		iter = mem.find(reg[11] + i);
+	}
+
+	reg[10] = len+1;
+	return;
+}
+
 static void sys_gettimeofday()
 {
 	int i = 0;
@@ -807,10 +829,12 @@ int scall(void)
 	// 	printf("%x    ", reg[i]);
 	// }
 	// printf("\n");
+	//printf("scall: %d\n", reg[17]);
 	switch(reg[17])
 	{
 		//TODO Finish some syscalls
-		case 64: sys_write(); break;
+		case 64: sys_write();break;
+		case 63: sys_read(); break;
 		case 80: break;
 		case 169: sys_gettimeofday(); break;
 		case 214: break;
@@ -821,6 +845,7 @@ int scall(void)
 			break;
 		}
 	}
+	return 1;
 #ifdef DEBUG_EXECUTION
 	printf("SCALL, num:%x  executed!	\n", reg[17]);
 #endif

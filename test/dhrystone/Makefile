@@ -15,7 +15,7 @@
 #	to run this Makefile.  The public domain "ndmake" will suffice.
 #
 CC=		cl			# C compiler name goes here (MSC)
-CC=		riscv64-unknown-elf-gcc			# C compiler name goes here (UNIX)
+CC=		riscv64-unknown-elf-gcc # C compiler name goes here (UNIX)
 #CC=		cc			# C compiler name goes here (UNIX)
 
 PROGS=		msc			# Programs to build (MSC)

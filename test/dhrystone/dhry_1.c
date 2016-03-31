@@ -87,7 +87,6 @@ main ()
   REG   int             Number_Of_Runs;
 
   /* Initializations */
-
   Next_Ptr_Glob = (Rec_Pointer) malloc (sizeof (Rec_Type));
   Ptr_Glob = (Rec_Pointer) malloc (sizeof (Rec_Type));
 
@@ -118,16 +117,15 @@ main ()
     printf ("Program compiled without 'register' attribute\n");
     printf ("\n");
   }
-  printf ("Please give the number of runs through the benchmark: ");
-  {
+  printf ("Please give the number of runs through the benchmark: \n");
+  
 
 //Modified by lyc
-#if 0
+
     int n;
     scanf ("%d", &n);
-#endif
-    Number_Of_Runs = 5000;
-  }
+    Number_Of_Runs = n;
+  
   printf ("\n");
 
   printf ("Execution starts, %d runs through Dhrystone\n", Number_Of_Runs);
