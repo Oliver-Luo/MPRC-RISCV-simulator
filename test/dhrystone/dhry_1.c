@@ -126,7 +126,7 @@ main ()
     int n;
     scanf ("%d", &n);
 #endif
-    Number_Of_Runs = 10000;
+    Number_Of_Runs = 5000;
   }
   printf ("\n");
 
@@ -264,6 +264,10 @@ main ()
   User_Time = End_Time - Begin_Time;
 
 //Modified by lyc
+
+  printf("User Time: %d, Begin Time: %d, End Time: %d\n", User_Time, Begin_Time, End_Time);
+  printf("Number of runs: %d\n", Number_Of_Runs);
+
 #if 0
   if (User_Time < Too_Small_Time)
   {

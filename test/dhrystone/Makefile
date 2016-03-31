@@ -21,9 +21,9 @@ CC=		riscv64-unknown-elf-gcc			# C compiler name goes here (UNIX)
 PROGS=		msc			# Programs to build (MSC)
 PROGS=		unix			# Programs to build (UNIX)
 
-TIME_FUNC=	-DMSC_CLOCK		# Use Microsoft clock() for measurement
+#TIME_FUNC=	-DMSC_CLOCK		# Use Microsoft clock() for measurement
 TIME_FUNC=	-DTIME			# Use time(2) for measurement
-TIME_FUNC=	-DTIMES			# Use times(2) for measurement
+#TIME_FUNC=	-DTIMES			# Use times(2) for measurement
 HZ=		50			# Frequency of times(2) clock ticks
 HZ=		60			# Frequency of times(2) clock ticks
 HZ=		100			# Frequency of times(2) clock ticks
@@ -41,7 +41,7 @@ OPTIMIZE=	-O			# Optimization Level (generic UNIX)
 
 LFLAGS=					#Loader Flags
 
-CFLAGS=	-m32 $(OPTIMIZE) $(TIME_FUNC) -DHZ=$(HZ) $(ENUMS) $(STRUCTASSIGN) $(CFL)
+CFLAGS=	-m32 -march=RV32I $(OPTIMIZE) $(TIME_FUNC) -DHZ=$(HZ) $(ENUMS) $(STRUCTASSIGN) $(CFL)
 
 #
 #		You shouldn't need to touch the rest
@@ -117,7 +117,7 @@ dry2shar.3: $(FILES3)
 	shar -p X $(FILES3) >$@
 
 clean:
-	-rm -f *.o *.obj
+	-rm -f *.o *.obj dry2 dry2reg
 
 clobber: clean
 	-rm -f $(UNIX_PROGS) $(MSC_PROGS) dry2shar.* dry2.arc
