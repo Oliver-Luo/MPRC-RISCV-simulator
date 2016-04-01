@@ -8,6 +8,9 @@
  * Copyright (C) 2014-2015 Microprocessor R&D Center (MPRC), Peking University
  */
 
+#ifndef __RISCV_INST_H
+#define __RISCV_INST_H
+
 #include <stdint.h>
 
 void lui(uint32_t inst);
@@ -63,7 +66,6 @@ void fdiv_d(uint32_t inst);
 void fdiv_s(uint32_t inst);
 void fsgnj_d(uint32_t inst);
 void fmv_s_x(uint32_t inst);
-int scall(void);
 // fcvt.s.w	fa
 // fcvt.d.s	fa
 // lui	a4,0x1b
@@ -79,3 +81,5 @@ int scall(void);
 // fsw	fa5,-18
 // flw	fa5,-18
 // fcvt.d.s	fa
+
+#endif /* __RISCV_INST_H */

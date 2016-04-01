@@ -15,6 +15,7 @@
 #include "simulator.h"
 #include "elf_format.h"
 #include "riscv_inst.h"
+#include "syscall.h"
 
 using namespace std;
 

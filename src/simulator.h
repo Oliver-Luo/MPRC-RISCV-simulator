@@ -11,6 +11,8 @@
 #ifndef __SIMULATOR_H
 #define __SIMULATOR_H
 
+#include <stdint.h>
+
 //RV32I
 #define LUI 0
 #define AUIPC 1
@@ -198,5 +200,6 @@
 #define UIMP -1
 #define ILL -2 
 
+uint8_t retrieve_or_error(uint32_t addr);
 
 #endif /* __SIMULATOR_H */
