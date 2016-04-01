@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ $# != 1 ]; then
-	echo "Usage: " `basename $0` " filename"
+	echo "Usage: " `basename $0` " filename of the C file"
 	exit
 fi
 

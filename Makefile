@@ -35,5 +35,5 @@ debug_content:
 	g++ -DDEBUG_CONTENT -o simulator ./src/*.cpp ./src/*.h
 
 .PHONY:debug_single_step
-debug:
+debug_single_step:
 	g++ -DDEBUG -DDEBUG_EXECUTION -o simulator ./src/*.cpp ./src/*.h
